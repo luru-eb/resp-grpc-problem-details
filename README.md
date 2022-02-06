@@ -31,3 +31,39 @@ Open a new browser and type this:
 http://localhost:8081/books/0-7645-2641-3
 ```
 
+You'll see the details of the book
+
+```json
+{
+  "isbn": "0-7645-2641-3",
+  "title": "Clean Code",
+  "author": "Uncle Bob",
+  "page": 400
+}
+```
+
+Try to an invalid ISBN
+
+```txt
+http://localhost:8081/books/123456
+```
+
+You'll see a problem details error:
+
+```json
+{
+  "title": "Not Found",
+  "status": 404,
+  "detail": "NOT_FOUND: Book not found",
+  "eb_isbn": "123456",
+  "eb_message": "Book not found"
+}
+```
+
+## Considertions
+
+This a PoC and there are a lot of things to improve:
+
+* Parsing eb_ prefix in the metadata to improve the error
+* Improve the status mapping to avoid send sensitive message to the clients
+
