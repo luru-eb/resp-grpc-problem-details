@@ -12,11 +12,21 @@ import java.net.URI
 
 @ControllerAdvice
 class ProblemDetailsControllerAdvice: ProblemHandling {
+    val statusMappings = mapOf(
+        io.grpc.Status.Code.NOT_FOUND to Status.NOT_FOUND,
+        io.grpc.Status.Code.UNKNOWN to Status.BAD_REQUEST,
+        io.grpc.Status.Code.UNIMPLEMENTED to Status.NOT_IMPLEMENTED,
+        io.grpc.Status.Code.UNAVAILABLE to Status.SERVICE_UNAVAILABLE,
+        io.grpc.Status.Code.UNAUTHENTICATED to Status.UNAUTHORIZED,
+        io.grpc.Status.Code.PERMISSION_DENIED to Status.FORBIDDEN,
+    ).withDefault { Status.INTERNAL_SERVER_ERROR }
+
     override fun prepare(throwable: Throwable, status: StatusType, type: URI): ProblemBuilder {
         if (throwable is StatusRuntimeException) {
+            val status = statusMappings[throwable.status.code]!!
             var builder = Problem.builder()
-                .withTitle(Status.NOT_FOUND.reasonPhrase)
-                .withStatus(Status.NOT_FOUND)
+                .withTitle(status.reasonPhrase)
+                .withStatus(status)
                 .withDetail(throwable.message)
             val trailers = throwable.trailers
             for (k in trailers?.keys()!!.filter { it.startsWith("eb_") }){
